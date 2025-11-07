@@ -1,67 +1,51 @@
 package com.n180688.musicplayer
 
-
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-/**
- * Адаптер для отображения списка треков в RecyclerView
- *
- * @param tracks - список треков для отображения
- * @param onTrackClick - callback функция, вызывается при клике на трек
- */
 class TrackAdapter(
     private val tracks: List<Track>,
-    private val onTrackClick: (Track) -> Unit  // Лямбда для обработки клика
+    private val onTrackClick: (Track) -> Unit
 ) : RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
 
-    /**
-     * ViewHolder - контейнер для View элементов одного трека
-     * Хранит ссылки на TextView, чтобы не искать их каждый раз через findViewById
-     */
     class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textTrackName: TextView = itemView.findViewById(R.id.textTrackName)
         val textArtistName: TextView = itemView.findViewById(R.id.textArtistName)
+        val textTrackDuration: TextView = itemView.findViewById(R.id.textTrackDuration)
     }
 
-    /**
-     * Создает новый ViewHolder
-     * Вызывается когда RecyclerView нужен новый элемент списка
-     */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
-        // Inflate = "раздуть" XML в View объект
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_track, parent, false)
-
         return TrackViewHolder(view)
     }
 
-    /**
-     * Заполняет ViewHolder данными трека
-     * Вызывается для каждого видимого элемента списка
-     *
-     * @param holder - ViewHolder который нужно заполнить
-     * @param position - позиция элемента в списке
-     */
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         val track = tracks[position]
 
-        // Заполняем TextView данными
         holder.textTrackName.text = track.title
         holder.textArtistName.text = track.artist
+        holder.textTrackDuration.text = formatDuration(track.duration)
 
-        // Обработчик клика на весь элемент списка
         holder.itemView.setOnClickListener {
-            onTrackClick(track)  // Вызываем callback с выбранным треком
+            onTrackClick(track)
         }
     }
 
-    /**
-     * Возвращает количество элементов в списке
-     * RecyclerView использует это чтобы понять сколько элементов отрисовывать
-     */
     override fun getItemCount(): Int = tracks.size
+
+    /**
+     * Форматирует длительность из миллисекунд в формат "мм:сс"
+     */
+    private fun formatDuration(durationMs: Long): String {
+        val seconds = (durationMs / 1000).toInt()
+        val minutes = seconds / 60
+        val remainingSeconds = seconds % 60
+
+        // Форматируем: минуты:секунды (секунды всегда 2 цифры)
+        return String.format("%d:%02d", minutes, remainingSeconds)
+    }
 }
