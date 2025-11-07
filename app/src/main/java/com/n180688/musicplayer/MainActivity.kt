@@ -1,6 +1,5 @@
 package com.n180688.musicplayer
 
-
 import android.Manifest
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
@@ -24,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var buttonPlay: Button
     private lateinit var buttonNext: Button
     private lateinit var buttonPrevious: Button
+    private lateinit var buttonPlayMode: Button
 
     // Данные
     private val tracks = mutableListOf<Track>()  // Список всех треков
@@ -33,10 +33,16 @@ class MainActivity : AppCompatActivity() {
     private var mediaPlayer: MediaPlayer? = null
     private var isPlaying = false
 
+    // Режим воспроизведения
+    private var playMode: PlayMode = PlayMode.NORMAL
+
+    // Для shuffle режима - запоминаем порядок воспроизведения
+    private var shuffledIndices = mutableListOf<Int>()
+
     // Адаптер для списка
     private lateinit var adapter: TrackAdapter
 
-    // Запрос разрешений (современный способ)
+    // Запрос разрешений
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -73,6 +79,7 @@ class MainActivity : AppCompatActivity() {
         buttonPlay = findViewById(R.id.buttonPlay)
         buttonNext = findViewById(R.id.buttonNext)
         buttonPrevious = findViewById(R.id.buttonPrevious)
+        buttonPlayMode = findViewById(R.id.buttonPlayMode)
     }
 
     // Настройка RecyclerView (списка треков)
@@ -100,8 +107,7 @@ class MainActivity : AppCompatActivity() {
             } else if (isPlaying) {
                 // Играет - ставим на паузу
                 pauseTrack()
-            } else {
-                // На паузе - возобновляем
+            } else {// На паузе - возобновляем
                 resumeTrack()
             }
         }
@@ -114,7 +120,26 @@ class MainActivity : AppCompatActivity() {
         // Previous
         buttonPrevious.setOnClickListener {
             playPreviousTrack()
+        }
 
+        // Play Mode - переключение режимов
+        buttonPlayMode.setOnClickListener {
+            playMode = playMode.next()  // Переключаем режим
+            buttonPlayMode.text = playMode.getIcon()  // Обновляем иконку
+
+            // Если включили shuffle - создаем перемешанный список
+            if (playMode == PlayMode.SHUFFLE) {
+                createShuffleOrder()
+            }
+
+            // Показываем уведомление о смене режима
+            val modeName = when (playMode) {
+                PlayMode.NORMAL -> "По порядку"
+                PlayMode.REPEAT_ALL -> "Повтор всех"
+                PlayMode.REPEAT_ONE -> "Повтор трека"
+                PlayMode.SHUFFLE -> "Случайный порядок"
+            }
+            Toast.makeText(this, modeName, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -212,14 +237,36 @@ class MainActivity : AppCompatActivity() {
 
             // Обработчик завершения трека
             mediaPlayer?.setOnCompletionListener {
-                playNextTrack()
+                // Действие зависит от режима воспроизведения
+                when (playMode) {
+                    PlayMode.NORMAL -> {
+                        // По порядку - если не последний, играем следующий
+                        if (currentTrackIndex < tracks.size - 1) {
+                            playNextTrack()
+                        } else {
+                            // Последний трек - останавливаемся
+                            stopCurrentTrack()
+                            updateUI()
+                        }
+                    }
+                    PlayMode.REPEAT_ALL -> {
+                        // Повтор всех - всегда следующий (зацикливается)
+                        playNextTrack()
+                    }
+                    PlayMode.REPEAT_ONE -> {
+                        // Повтор текущего - перезапускаем этот же трек
+                        playTrack(currentTrackIndex)
+                    }
+                    PlayMode.SHUFFLE -> {
+                        // Shuffle - следующий случайный
+                        playNextTrack()
+                    }
+                }
             }
 
         } catch (e: Exception) {
             Toast.makeText(this, "Ошибка воспроизведения: ${e.message}", Toast.LENGTH_SHORT).show()
             e.printStackTrace()
-
-
         }
     }
 
@@ -253,7 +300,19 @@ class MainActivity : AppCompatActivity() {
     private fun playNextTrack() {
         if (tracks.isEmpty()) return
 
-        currentTrackIndex = (currentTrackIndex + 1) % tracks.size
+        currentTrackIndex = when (playMode) {
+            PlayMode.SHUFFLE -> {
+                // Shuffle: берем следующий из перемешанного списка
+                val currentShuffleIndex = shuffledIndices.indexOf(currentTrackIndex)
+                val nextShuffleIndex = (currentShuffleIndex + 1) % shuffledIndices.size
+                shuffledIndices[nextShuffleIndex]
+            }
+            else -> {
+                // Обычный/Repeat: следующий по кругу
+                (currentTrackIndex + 1) % tracks.size
+            }
+        }
+
         playTrack(currentTrackIndex)
     }
 
@@ -261,12 +320,35 @@ class MainActivity : AppCompatActivity() {
     private fun playPreviousTrack() {
         if (tracks.isEmpty()) return
 
-        currentTrackIndex = if (currentTrackIndex <= 0) {
-            tracks.size - 1
-        } else {
-            currentTrackIndex - 1
+        currentTrackIndex = when (playMode) {
+            PlayMode.SHUFFLE -> {
+                // Shuffle: берем предыдущий из перемешанного списка
+                val currentShuffleIndex = shuffledIndices.indexOf(currentTrackIndex)
+                val prevShuffleIndex = if (currentShuffleIndex <= 0) {
+                    shuffledIndices.size - 1
+                } else {
+                    currentShuffleIndex - 1
+                }
+                shuffledIndices[prevShuffleIndex]
+            }
+            else -> {
+                // Обычный/Repeat: предыдущий по кругу
+                if (currentTrackIndex <= 0) {
+                    tracks.size - 1
+                } else {
+                    currentTrackIndex - 1
+                }
+            }
         }
+
         playTrack(currentTrackIndex)
+    }
+
+    // Создает случайный порядок воспроизведения для Shuffle
+    private fun createShuffleOrder() {
+        shuffledIndices.clear()
+        shuffledIndices.addAll(tracks.indices)  // Заполняем индексами 0, 1, 2, ...
+        shuffledIndices.shuffle()  // Перемешиваем!
     }
 
     // Обновление UI

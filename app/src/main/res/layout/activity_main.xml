@@ -32,6 +32,16 @@
             android:gravity="center"
             android:layout_marginBottom="12dp" />
 
+        <!-- Кнопка режима воспроизведения -->
+        <Button
+            android:id="@+id/buttonPlayMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="➡️"
+            android:textSize="16sp"
+            android:layout_gravity="center"
+            android:layout_marginBottom="8dp" />
+
         <!-- Кнопки управления -->
         <LinearLayout
             android:layout_width="match_parent"
