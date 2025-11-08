@@ -24,9 +24,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var buttonNext: Button
     private lateinit var buttonPrevious: Button
     private lateinit var buttonPlayMode: Button
+    private lateinit var buttonSort: Button
 
     // Данные
     private val tracks = mutableListOf<Track>()  // Список всех треков
+    private val originalTracks = mutableListOf<Track>()  // Оригинальный порядок (для восстановления)
     private var currentTrackIndex = -1  // Индекс текущего трека (-1 = ничего не играет)
 
     // MediaPlayer для воспроизведения
@@ -35,6 +37,9 @@ class MainActivity : AppCompatActivity() {
 
     // Режим воспроизведения
     private var playMode: PlayMode = PlayMode.NORMAL
+
+    // Режим сортировки
+    private var sortMode: SortMode = SortMode.DATE_ADDED
 
     // Для shuffle режима - запоминаем порядок воспроизведения
     private var shuffledIndices = mutableListOf<Int>()
@@ -80,7 +85,9 @@ class MainActivity : AppCompatActivity() {
         buttonNext = findViewById(R.id.buttonNext)
         buttonPrevious = findViewById(R.id.buttonPrevious)
         buttonPlayMode = findViewById(R.id.buttonPlayMode)
+        buttonSort = findViewById(R.id.buttonSort)
     }
+
 
     // Настройка RecyclerView (списка треков)
     private fun setupRecyclerView() {
@@ -101,13 +108,15 @@ class MainActivity : AppCompatActivity() {
     private fun setupButtons() {
         // Play/Pause
         buttonPlay.setOnClickListener {
+
             if (currentTrackIndex == -1 && tracks.isNotEmpty()) {
                 // Ничего не играет - начинаем с первого трека
                 playTrack(0)
             } else if (isPlaying) {
                 // Играет - ставим на паузу
                 pauseTrack()
-            } else {// На паузе - возобновляем
+            } else {
+                // На паузе - возобновляем
                 resumeTrack()
             }
         }
@@ -120,6 +129,19 @@ class MainActivity : AppCompatActivity() {
         // Previous
         buttonPrevious.setOnClickListener {
             playPreviousTrack()
+        }
+
+        buttonSort.setOnClickListener {
+            sortMode = sortMode.next()
+            buttonSort.text = sortMode.getDisplayText()
+            applySorting()
+
+            val sortName = when (sortMode) {
+                SortMode.A_Z -> "Сортировка A-Z"
+                SortMode.Z_A -> "Сортировка Z-A"
+                SortMode.DATE_ADDED -> "Сортировка по дате"
+            }
+            Toast.makeText(this, sortName, Toast.LENGTH_SHORT).show()
         }
 
         // Play Mode - переключение режимов
@@ -168,6 +190,7 @@ class MainActivity : AppCompatActivity() {
     // Сканирование музыкальных файлов
     private fun loadMusicFiles() {
         tracks.clear()
+        originalTracks.clear()
 
         // ContentResolver для доступа к MediaStore
         val projection = arrayOf(
@@ -199,14 +222,16 @@ class MainActivity : AppCompatActivity() {
                 val title = cursor.getString(titleColumn) ?: "Неизвестный трек"
                 val artist = cursor.getString(artistColumn) ?: "Неизвестный исполнитель"
                 val path = cursor.getString(dataColumn)
+
                 val duration = cursor.getLong(durationColumn)
 
-                tracks.add(Track(id, title, artist, path, duration))
+                val track = Track(id, title, artist, path, duration)
+                originalTracks.add(track)  // Сохраняем оригинальный порядок
             }
         }
 
-        // Обновляем список
-        adapter.notifyDataSetChanged()
+        // Применяем сортировку
+        applySorting()
 
         if (tracks.isEmpty()) {
             Toast.makeText(this, "Музыкальные файлы не найдены", Toast.LENGTH_SHORT).show()
@@ -314,6 +339,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         playTrack(currentTrackIndex)
+
     }
 
     // Предыдущий трек
@@ -348,7 +374,39 @@ class MainActivity : AppCompatActivity() {
     private fun createShuffleOrder() {
         shuffledIndices.clear()
         shuffledIndices.addAll(tracks.indices)  // Заполняем индексами 0, 1, 2, ...
-        shuffledIndices.shuffle()  // Перемешиваем!
+        shuffledIndices.shuffle()  // Перемешиваем
+    }
+
+    /**
+     * Применяет текущий режим сортировки к списку треков
+     */
+    private fun applySorting() {
+        // Сохраняем текущий играющий трек
+        val currentTrack = if (currentTrackIndex >= 0 && currentTrackIndex < tracks.size) {
+            tracks[currentTrackIndex]
+        } else {
+            null
+        }
+
+        // Очищаем список
+        tracks.clear()
+
+        // Применяем сортировку
+        val sortedTracks = sortMode.sort(originalTracks)
+        tracks.addAll(sortedTracks)
+
+        // Находим новый индекс текущего трека (если он играет)
+        if (currentTrack != null) {
+            currentTrackIndex = tracks.indexOfFirst { it.id == currentTrack.id }
+        }
+
+        // Обновляем список
+        adapter.notifyDataSetChanged()
+
+        // Если включен shuffle - пересоздаем порядок
+        if (playMode == PlayMode.SHUFFLE) {
+            createShuffleOrder()
+        }
     }
 
     // Обновление UI

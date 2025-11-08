@@ -2,8 +2,38 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:orientation="vertical">
+
+    <!-- Панель инструментов (под Action Bar) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#F5F5F5"
+        android:padding="8dp"
+        android:elevation="2dp">
+
+        <!-- Кнопка сортировки -->
+        <Button
+            android:id="@+id/buttonSort"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🔤 A-Z"
+            android:textSize="14sp"
+            android:layout_marginEnd="4dp" />
+
+        <!-- Кнопка режима воспроизведения -->
+        <Button
+            android:id="@+id/buttonPlayMode"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="➡️"
+            android:textSize="14sp"
+            android:layout_marginStart="4dp" />
+
+    </LinearLayout>
 
     <!-- Список треков -->
     <androidx.recyclerview.widget.RecyclerView
@@ -11,9 +41,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginTop="8dp" />
 
-    <!-- Панель управления -->
+    <!-- Панель управления воспроизведением (внизу) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -30,17 +60,9 @@
             android:text="Выберите трек"
             android:textSize="16sp"
             android:gravity="center"
-            android:layout_marginBottom="12dp" />
-
-        <!-- Кнопка режима воспроизведения -->
-        <Button
-            android:id="@+id/buttonPlayMode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="➡️"
-            android:textSize="16sp"
-            android:layout_gravity="center"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="12dp"
+            android:maxLines="1"
+            android:ellipsize="end" />
 
         <!-- Кнопки управления -->
         <LinearLayout
