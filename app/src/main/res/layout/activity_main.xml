@@ -4,14 +4,16 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- Панель инструментов (под Action Bar) -->
+    <!-- ОБЫЧНАЯ ПАНЕЛЬ (видна по умолчанию) -->
     <LinearLayout
+        android:id="@+id/toolbarNormal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:background="#F5F5F5"
         android:padding="8dp"
-        android:elevation="2dp">
+        android:elevation="2dp"
+        android:visibility="visible">
 
         <!-- Кнопка сортировки -->
         <Button
@@ -34,6 +36,40 @@
             android:layout_marginStart="4dp" />
 
     </LinearLayout>
+
+    <!-- ПАНЕЛЬ ПОИСКА (скрыта по умолчанию) -->
+    <LinearLayout
+        android:id="@+id/toolbarSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#F5F5F5"
+        android:padding="8dp"
+        android:elevation="2dp"
+        android:visibility="gone">
+
+        <!-- Кнопка "Назад" -->
+        <Button
+            android:id="@+id/buttonSearchBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="←"
+            android:textSize="18sp"
+            android:layout_marginEnd="8dp" />
+
+        <!-- Поле ввода поиска -->
+        <EditText
+            android:id="@+id/editTextSearch"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Поиск..."
+            android:singleLine="true"
+            android:inputType="text"
+            android:imeOptions="actionSearch" />
+
+    </LinearLayout>
+
 
     <!-- Список треков -->
     <androidx.recyclerview.widget.RecyclerView

@@ -14,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import android.widget.EditText
+import android.widget.LinearLayout
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,6 +27,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var buttonPrevious: Button
     private lateinit var buttonPlayMode: Button
     private lateinit var buttonSort: Button
+    private lateinit var toolbarNormal: LinearLayout
+    private lateinit var toolbarSearch: LinearLayout
+    private lateinit var editTextSearch: EditText
+    private lateinit var buttonSearchBack: Button
+
+    // Список для отфильтрованных треков
+    private val filteredTracks = mutableListOf<Track>()
+    private var isSearchMode = false  // Флаг режима поиска
 
     // Данные
     private val tracks = mutableListOf<Track>()  // Список всех треков
@@ -73,6 +83,9 @@ class MainActivity : AppCompatActivity() {
         // Настройка кнопок
         setupButtons()
 
+        //настройка поиска
+        setupSearch()
+
         // Проверка и запрос разрешений
         checkAndRequestPermissions()
     }
@@ -86,23 +99,31 @@ class MainActivity : AppCompatActivity() {
         buttonPrevious = findViewById(R.id.buttonPrevious)
         buttonPlayMode = findViewById(R.id.buttonPlayMode)
         buttonSort = findViewById(R.id.buttonSort)
+        toolbarNormal = findViewById(R.id.toolbarNormal)
+        toolbarSearch = findViewById(R.id.toolbarSearch)
+        editTextSearch = findViewById(R.id.editTextSearch)
+        buttonSearchBack = findViewById(R.id.buttonSearchBack)
     }
 
 
     // Настройка RecyclerView (списка треков)
     private fun setupRecyclerView() {
-        // LinearLayoutManager = вертикальный список
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // Создаем адаптер с обработчиком клика
-        adapter = TrackAdapter(tracks) { track ->
-            // Это лямбда - вызывается при клике на трек
-            val index = tracks.indexOf(track)
+        // Используем filteredTracks вместо tracks
+        adapter = TrackAdapter(filteredTracks) { track ->
+            val index = if (isSearchMode) {
+                // В режиме поиска ищем трек в ОСНОВНОМ списке
+                tracks.indexOf(track)
+            } else {
+                filteredTracks.indexOf(track)
+            }
             playTrack(index)
         }
 
         recyclerView.adapter = adapter
     }
+
 
     // Настройка кнопок управления
     private fun setupButtons() {
@@ -164,6 +185,110 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, modeName, Toast.LENGTH_SHORT).show()
         }
     }
+
+
+    /**
+     * Настройка поиска
+     */
+    private fun setupSearch() {
+        // Кнопка "Назад" - выход из режима поиска
+        buttonSearchBack.setOnClickListener {
+            exitSearchMode()
+        }
+
+        // Слушатель изменения текста в поле поиска
+        editTextSearch.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Не используется
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Вызывается при каждом изменении текста
+                filterTracks(s.toString())
+            }
+
+            override fun afterTextChanged(s: android.text.Editable?) {
+                // Не используется
+            }
+        })
+    }
+
+    /**
+     * Переключение в режим поиска
+     */
+    private fun enterSearchMode() {
+        isSearchMode = true
+
+        // СКРЫВАЕМ ACTION BAR
+        supportActionBar?.hide()
+
+        // Показываем панель поиска, скрываем обычную
+        toolbarNormal.visibility = android.view.View.GONE
+        toolbarSearch.visibility = android.view.View.VISIBLE
+
+        // Фокус на поле ввода + показываем клавиатуру
+        editTextSearch.requestFocus()
+        val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE)
+                as android.view.inputmethod.InputMethodManager
+        imm.showSoftInput(editTextSearch, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+
+        // Изначально показываем все треки
+        filteredTracks.clear()
+        filteredTracks.addAll(tracks)
+        adapter.notifyDataSetChanged()
+    }
+
+    /**
+     * Выход из режима поиска
+     */
+    private fun exitSearchMode() {
+        isSearchMode = false
+
+        // ПОКАЗЫВАЕМ ACTION BAR ОБРАТНО
+        supportActionBar?.show()
+
+        // Возвращаем обычную панель
+        toolbarNormal.visibility = android.view.View.VISIBLE
+        toolbarSearch.visibility = android.view.View.GONE
+
+        // Очищаем поле поиска
+        editTextSearch.text.clear()
+
+        // Прячем клавиатуру
+        val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE)
+                as android.view.inputmethod.InputMethodManager
+        imm.hideSoftInputFromWindow(editTextSearch.windowToken, 0)
+
+        // Возвращаем полный список
+        filteredTracks.clear()
+        filteredTracks.addAll(tracks)
+        adapter.notifyDataSetChanged()
+    }
+
+    /**
+     * Фильтрация треков по запросу
+     */
+    private fun filterTracks(query: String) {
+        filteredTracks.clear()
+
+        if (query.isEmpty()) {
+            // Пустой запрос - показываем все
+            filteredTracks.addAll(tracks)
+        } else {
+            // Ищем треки где название или артист содержат запрос (без учета регистра)
+            val lowerQuery = query.lowercase()
+            filteredTracks.addAll(
+                tracks.filter { track ->
+                    track.title.lowercase().contains(lowerQuery) ||
+                            track.artist.lowercase().contains(lowerQuery)
+                }
+            )
+        }
+
+        adapter.notifyDataSetChanged()
+    }
+
+
 
     // Проверка и запрос разрешений
     private fun checkAndRequestPermissions() {
@@ -232,6 +357,10 @@ class MainActivity : AppCompatActivity() {
 
         // Применяем сортировку
         applySorting()
+
+        //Инициализируем filteredTracks
+        filteredTracks.clear()
+        filteredTracks.addAll(tracks)
 
         if (tracks.isEmpty()) {
             Toast.makeText(this, "Музыкальные файлы не найдены", Toast.LENGTH_SHORT).show()
@@ -403,6 +532,16 @@ class MainActivity : AppCompatActivity() {
         // Обновляем список
         adapter.notifyDataSetChanged()
 
+        // filteredTracks тоже обновляем
+        if (isSearchMode) {
+            val query = editTextSearch.text.toString()
+            filterTracks(query)  // Пересортировка влияет на результаты поиска
+        } else {
+            filteredTracks.clear()
+            filteredTracks.addAll(tracks)
+            adapter.notifyDataSetChanged()
+        }
+
         // Если включен shuffle - пересоздаем порядок
         if (playMode == PlayMode.SHUFFLE) {
             createShuffleOrder()
@@ -435,4 +574,29 @@ class MainActivity : AppCompatActivity() {
             pauseTrack()
         }
     }
+
+
+    /**
+     * Создание меню в Action Bar
+     */
+    override fun onCreateOptionsMenu(menu: android.view.Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    /**
+     * Обработка кликов по элементам меню
+     */
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_search -> {
+                enterSearchMode()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+
+
 }
