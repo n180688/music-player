@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.widget.EditText
 import android.widget.LinearLayout
+import androidx.activity.OnBackPressedCallback
 
 class MainActivity : AppCompatActivity() {
 
@@ -85,6 +86,9 @@ class MainActivity : AppCompatActivity() {
 
         //настройка поиска
         setupSearch()
+
+        //обработчик нажатия кнопки Назад
+        setupBackPressHandler()
 
         // Проверка и запрос разрешений
         checkAndRequestPermissions()
@@ -286,6 +290,26 @@ class MainActivity : AppCompatActivity() {
         }
 
         adapter.notifyDataSetChanged()
+    }
+
+
+
+    /**
+     * Настройка обработки кнопки "Назад" (современный способ)
+     */
+    private fun setupBackPressHandler() {
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (isSearchMode) {
+                    // В режиме поиска - выходим из него
+                    exitSearchMode()
+                } else {
+                    // Иначе стандартное поведение (выход)
+                    isEnabled = false  // Отключаем callback
+                    onBackPressedDispatcher.onBackPressed()  // Вызываем стандартную обработку
+                }
+            }
+        })
     }
 
 
