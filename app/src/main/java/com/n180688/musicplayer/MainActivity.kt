@@ -156,27 +156,7 @@ class MainActivity : AppCompatActivity() {
             playPreviousTrack()
         }
 
-        buttonSort.setOnClickListener {
-            sortMode = sortMode.next()
 
-            //обновляем текст кнопки
-
-            val sortText = when (sortMode) {
-                SortMode.A_Z -> "A-Z"
-                SortMode.Z_A -> "Z-A"
-                SortMode.DATE_ADDED -> "Дата"
-            }
-            buttonSort.text = sortText
-
-            applySorting()
-
-            val sortName = when (sortMode) {
-                SortMode.A_Z -> "Сортировка A-Z"
-                SortMode.Z_A -> "Сортировка Z-A"
-                SortMode.DATE_ADDED -> "Сортировка по дате"
-            }
-            Toast.makeText(this, sortName, Toast.LENGTH_SHORT).show()
-        }
 
         // Play Mode - переключение режимов
         buttonPlayMode.setOnClickListener {
@@ -208,7 +188,62 @@ class MainActivity : AppCompatActivity() {
             }
             Toast.makeText(this, modeName, Toast.LENGTH_SHORT).show()
         }
+
+        //Sort - открыть диалог выбора
+        buttonSort.setOnClickListener {
+            showSortDialog()
+        }
+
+
     }
+
+
+    /**
+     * Показать диалог выбора сортировки
+     */
+
+    private fun showSortDialog() {
+        // Создаём Bottom Sheet Dialog
+        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(this)
+
+        // Загружаем layout диалога
+        val view = layoutInflater.inflate(R.layout.dialog_sort, null)
+        dialog.setContentView(view)
+
+        // Находим элементы диалога
+        val sortOptionAZ = view.findViewById<TextView>(R.id.sortOptionAZ)
+        val sortOptionZA = view.findViewById<TextView>(R.id.sortOptionZA)
+        val sortOptionDate = view.findViewById<TextView>(R.id.sortOptionDate)
+
+        // Обработчик: A-Z
+        sortOptionAZ.setOnClickListener {
+            sortMode = SortMode.A_Z
+            applySorting()
+            dialog.dismiss()  // Закрываем диалог
+            Toast.makeText(this, "Сортировка: A-Z", Toast.LENGTH_SHORT).show()
+        }
+
+        // Обработчик: Z-A
+        sortOptionZA.setOnClickListener {
+            sortMode = SortMode.Z_A
+            applySorting()
+            dialog.dismiss()
+            Toast.makeText(this, "Сортировка: Z-A", Toast.LENGTH_SHORT).show()
+        }
+
+        // Обработчик: По дате
+        sortOptionDate.setOnClickListener {
+            sortMode = SortMode.DATE_ADDED
+            applySorting()
+            dialog.dismiss()
+            Toast.makeText(this, "Сортировка: по дате", Toast.LENGTH_SHORT).show()
+        }
+
+        // Показываем диалог
+        dialog.show()
+    }
+
+
 
 
     /**

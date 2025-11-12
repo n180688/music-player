@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Заголовок -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Сортировка"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Опция: A-Z -->
+    <TextView
+        android:id="@+id/sortOptionAZ"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="По названию (A-Z)"
+        android:textSize="16sp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <!-- Опция: Z-A -->
+    <TextView
+        android:id="@+id/sortOptionZA"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="По названию (Z-A)"
+        android:textSize="16sp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <!-- Опция: По дате -->
+    <TextView
+        android:id="@+id/sortOptionDate"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="По дате добавления"
+        android:textSize="16sp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true" />
+
+</LinearLayout>
