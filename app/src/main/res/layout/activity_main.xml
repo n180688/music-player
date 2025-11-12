@@ -18,22 +18,27 @@
         <!-- Кнопка сортировки -->
         <Button
             android:id="@+id/buttonSort"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:contentDescription="Сортировка треков"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="🔤 A-Z"
+            android:drawableStart="@drawable/ic_sort"
+            android:drawablePadding="4dp"
             android:textSize="14sp"
             android:layout_marginEnd="4dp" />
 
-        <!-- Кнопка режима воспроизведения -->
+        <!-- Кнопка режима воспроизведения  ПОЧИНИТЬ ЧТОБ НЕ ПЕРЕПРЫГИВАЛА СО СТАРТА  В ЦЕНТР-->
         <Button
             android:id="@+id/buttonPlayMode"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
             android:layout_weight="1"
-            android:text="➡️"
-            android:textSize="14sp"
-            android:layout_marginStart="4dp" />
+            android:contentDescription="Режим воспроизведения"
+            android:drawableStart="@drawable/ic_repeat"
+            android:textSize="12sp" />
 
     </LinearLayout>
 
@@ -109,27 +114,32 @@
 
             <Button
                 android:id="@+id/buttonPrevious"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="⏮"
-                android:textSize="18sp"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:contentDescription="Предыдущий трек"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:drawableTop="@drawable/ic_skip_previous"
                 android:layout_marginEnd="8dp" />
 
             <Button
                 android:id="@+id/buttonPlay"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="▶"
-                android:textSize="18sp"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:contentDescription="Воспроизведение"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:drawableTop="@drawable/ic_play"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp" />
 
             <Button
                 android:id="@+id/buttonNext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="⏭"
-                android:textSize="18sp"
+                android:contentDescription="Следующий трек"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:drawableTop="@drawable/ic_skip_next"
                 android:layout_marginStart="8dp" />
 
         </LinearLayout>

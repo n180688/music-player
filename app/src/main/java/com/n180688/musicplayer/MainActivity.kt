@@ -158,7 +158,16 @@ class MainActivity : AppCompatActivity() {
 
         buttonSort.setOnClickListener {
             sortMode = sortMode.next()
-            buttonSort.text = sortMode.getDisplayText()
+
+            //обновляем текст кнопки
+
+            val sortText = when (sortMode) {
+                SortMode.A_Z -> "A-Z"
+                SortMode.Z_A -> "Z-A"
+                SortMode.DATE_ADDED -> "Дата"
+            }
+            buttonSort.text = sortText
+
             applySorting()
 
             val sortName = when (sortMode) {
@@ -172,7 +181,18 @@ class MainActivity : AppCompatActivity() {
         // Play Mode - переключение режимов
         buttonPlayMode.setOnClickListener {
             playMode = playMode.next()  // Переключаем режим
-            buttonPlayMode.text = playMode.getIcon()  // Обновляем иконку
+            // Обновляем иконку и текст
+
+            //ДОБАВИТЬ НОРМАЛЬНУЮ  ИКОНКУ СТРЕЛКУ ДЛЯ ОБЫЧНОГО РЕЖИМА
+
+            val iconRes = when (playMode) {
+                PlayMode.NORMAL -> R.drawable.ic_repeat
+                PlayMode.REPEAT_ALL -> R.drawable.ic_repeat
+                PlayMode.REPEAT_ONE -> R.drawable.ic_repeat_one
+                PlayMode.SHUFFLE -> R.drawable.ic_shuffle
+            }
+
+            buttonPlayMode.setCompoundDrawablesWithIntrinsicBounds(0, iconRes, 0,0)
 
             // Если включили shuffle - создаем перемешанный список
             if (playMode == PlayMode.SHUFFLE) {
@@ -581,8 +601,13 @@ class MainActivity : AppCompatActivity() {
             textCurrentTrack.text = "Выберите трек"
         }
 
-        // Меняем текст кнопки Play/Pause
-        buttonPlay.text = if (isPlaying) "⏸" else "▶"
+        // Меняем иконку кнопки Play/Pause
+        val playPauseIcon = if (isPlaying) {
+            R.drawable.ic_pause
+        } else {
+            R.drawable.ic_play
+        }
+        buttonPlay.setCompoundDrawablesWithIntrinsicBounds(0, playPauseIcon, 0, 0)
     }
 
     // Освобождение ресурсов при закрытии приложения

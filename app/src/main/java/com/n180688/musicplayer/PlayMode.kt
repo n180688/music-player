@@ -21,15 +21,5 @@ enum class PlayMode {
         }
     }
 
-    /**
-     * Возвращает иконку для кнопки
-     */
-    fun getIcon(): String {
-        return when (this) {
-            NORMAL -> "➡️"
-            REPEAT_ALL -> "🔁"
-            REPEAT_ONE -> "🔂"
-            SHUFFLE -> "🔀"
-        }
-    }
+
 }
