@@ -28,7 +28,7 @@
             android:textSize="14sp"
             android:layout_marginEnd="4dp" />
 
-        <!-- Кнопка режима воспроизведения  ПОЧИНИТЬ ЧТОБ НЕ ПЕРЕПРЫГИВАЛА СО СТАРТА  В ЦЕНТР-->
+        <!-- Кнопка режима воспроизведения -->
         <Button
             android:id="@+id/buttonPlayMode"
             style="@style/Widget.AppCompat.Button.Borderless"
@@ -37,7 +37,7 @@
             android:layout_marginStart="4dp"
             android:layout_weight="1"
             android:contentDescription="Режим воспроизведения"
-            android:drawableStart="@drawable/ic_repeat"
+            android:drawableStart="@drawable/ic_arrow_forward"
             android:textSize="12sp" />
 
     </LinearLayout>
@@ -56,10 +56,11 @@
         <!-- Кнопка "Назад" -->
         <Button
             android:id="@+id/buttonSearchBack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="←"
-            android:textSize="18sp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:drawableStart="@drawable/ic_arrow_back"
+            android:contentDescription="Назад"
             android:layout_marginEnd="8dp" />
 
         <!-- Поле ввода поиска -->

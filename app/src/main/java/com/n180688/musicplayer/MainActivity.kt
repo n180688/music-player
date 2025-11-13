@@ -163,16 +163,16 @@ class MainActivity : AppCompatActivity() {
             playMode = playMode.next()  // Переключаем режим
             // Обновляем иконку и текст
 
-            //ДОБАВИТЬ НОРМАЛЬНУЮ  ИКОНКУ СТРЕЛКУ ДЛЯ ОБЫЧНОГО РЕЖИМА
+
 
             val iconRes = when (playMode) {
-                PlayMode.NORMAL -> R.drawable.ic_repeat
+                PlayMode.NORMAL -> R.drawable.ic_arrow_forward
                 PlayMode.REPEAT_ALL -> R.drawable.ic_repeat
                 PlayMode.REPEAT_ONE -> R.drawable.ic_repeat_one
                 PlayMode.SHUFFLE -> R.drawable.ic_shuffle
             }
 
-            buttonPlayMode.setCompoundDrawablesWithIntrinsicBounds(0, iconRes, 0,0)
+            buttonPlayMode.setCompoundDrawablesWithIntrinsicBounds(iconRes, 0,0,0)
 
             // Если включили shuffle - создаем перемешанный список
             if (playMode == PlayMode.SHUFFLE) {
