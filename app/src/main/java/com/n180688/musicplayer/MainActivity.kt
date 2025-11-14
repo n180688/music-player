@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
 
@@ -23,6 +24,8 @@ class MainActivity : AppCompatActivity() {
     // UI элементы
     private lateinit var recyclerView: RecyclerView
     private lateinit var textCurrentTrack: TextView
+    private lateinit var textCurrentArtist: TextView
+    private lateinit var imageAlbumArt: ImageView
     private lateinit var buttonPlay: Button
     private lateinit var buttonNext: Button
     private lateinit var buttonPrevious: Button
@@ -107,6 +110,8 @@ class MainActivity : AppCompatActivity() {
         toolbarSearch = findViewById(R.id.toolbarSearch)
         editTextSearch = findViewById(R.id.editTextSearch)
         buttonSearchBack = findViewById(R.id.buttonSearchBack)
+        textCurrentArtist = findViewById(R.id.textCurrentArtist)
+        imageAlbumArt = findViewById(R.id.imageAlbumArt)
     }
 
 
@@ -278,12 +283,25 @@ class MainActivity : AppCompatActivity() {
     private fun enterSearchMode() {
         isSearchMode = true
 
-        // СКРЫВАЕМ ACTION BAR
-        supportActionBar?.hide()
 
-        // Показываем панель поиска, скрываем обычную
-        toolbarNormal.visibility = android.view.View.GONE
-        toolbarSearch.visibility = android.view.View.VISIBLE
+        // Плавный переход: скрываем обычную панель
+        toolbarNormal.animate()
+            .alpha(0f)
+            .setDuration(200)
+            .withEndAction {
+                supportActionBar?.title = ""
+                toolbarNormal.visibility = android.view.View.GONE
+
+                //показываем панель поиска с fade-in
+                toolbarSearch.alpha = 0f
+                toolbarSearch.visibility = android.view.View.VISIBLE
+                toolbarSearch.animate()
+                    .alpha(1f)
+                    .setDuration(200)
+                    .start()
+            }
+            .start()
+
 
         // Фокус на поле ввода + показываем клавиатуру
         editTextSearch.requestFocus()
@@ -303,12 +321,23 @@ class MainActivity : AppCompatActivity() {
     private fun exitSearchMode() {
         isSearchMode = false
 
-        // ПОКАЗЫВАЕМ ACTION BAR ОБРАТНО
-        supportActionBar?.show()
+        // Плавный переход: скрываем панель поиска
+        toolbarSearch.animate()
+            .alpha(0f)
+            .setDuration(200)
+            .withEndAction {
+                toolbarSearch.visibility = android.view.View.GONE
+                supportActionBar?.title = "Музыка"
 
-        // Возвращаем обычную панель
-        toolbarNormal.visibility = android.view.View.VISIBLE
-        toolbarSearch.visibility = android.view.View.GONE
+                // Показываем обычную панель с fade-in
+                toolbarNormal.alpha = 0f
+                toolbarNormal.visibility = android.view.View.VISIBLE
+                toolbarNormal.animate()
+                    .alpha(1f)
+                    .setDuration(200)
+                    .start()
+            }
+            .start()
 
         // Очищаем поле поиска
         editTextSearch.text.clear()
@@ -631,9 +660,11 @@ class MainActivity : AppCompatActivity() {
     private fun updateUI() {
         if (currentTrackIndex >= 0 && currentTrackIndex < tracks.size) {
             val track = tracks[currentTrackIndex]
-            textCurrentTrack.text = "${track.title} - ${track.artist}"
+            textCurrentTrack.text = track.title
+            textCurrentArtist.text = track.artist
         } else {
             textCurrentTrack.text = "Выберите трек"
+            textCurrentArtist.text = "unknown"
         }
 
         // Меняем иконку кнопки Play/Pause
