@@ -7,6 +7,18 @@
     android:background="?android:attr/selectableItemBackground"
     android:clickable="true">
 
+
+    <!-- Обложка альбома -->
+    <ImageView
+        android:id="@+id/imageTrackAlbumArt"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="#CCCCCC"
+        android:scaleType="centerCrop"
+        android:contentDescription="Обложка"
+        android:layout_marginEnd="12dp" />
+
+
     <!-- Левая часть: название и артист -->
     <LinearLayout
         android:layout_width="0dp"

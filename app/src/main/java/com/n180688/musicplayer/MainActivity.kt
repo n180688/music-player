@@ -19,6 +19,8 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
 
+
+
 class MainActivity : AppCompatActivity() {
 
     // UI элементы
@@ -431,7 +433,8 @@ class MainActivity : AppCompatActivity() {
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.DATA,  // Путь к файлу
-            MediaStore.Audio.Media.DURATION
+            MediaStore.Audio.Media.DURATION,
+            android.provider.MediaStore.Audio.Media.ALBUM_ID //ID альбома для обложки
         )
 
         // Запрос только музыки (не звуки уведомлений и т.д.)
@@ -449,6 +452,7 @@ class MainActivity : AppCompatActivity() {
             val artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
             val dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
             val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
+            val albumIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
 
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idColumn)
@@ -457,8 +461,9 @@ class MainActivity : AppCompatActivity() {
                 val path = cursor.getString(dataColumn)
 
                 val duration = cursor.getLong(durationColumn)
+                val albumId = cursor.getLong(albumIdColumn)
 
-                val track = Track(id, title, artist, path, duration)
+                val track = Track(id, title, artist, path, duration, albumId)
                 originalTracks.add(track)  // Сохраняем оригинальный порядок
             }
         }
@@ -662,9 +667,13 @@ class MainActivity : AppCompatActivity() {
             val track = tracks[currentTrackIndex]
             textCurrentTrack.text = track.title
             textCurrentArtist.text = track.artist
+            loadAlbumArt(track.albumId, imageAlbumArt)
+
         } else {
             textCurrentTrack.text = "Выберите трек"
             textCurrentArtist.text = "unknown"
+            imageAlbumArt.setImageResource(R.drawable.ic_music_note)
+            imageAlbumArt.setBackgroundColor(android.graphics.Color.parseColor("#CCCCCC"))
         }
 
         // Меняем иконку кнопки Play/Pause
@@ -675,6 +684,91 @@ class MainActivity : AppCompatActivity() {
         }
         buttonPlay.setCompoundDrawablesWithIntrinsicBounds(0, playPauseIcon, 0, 0)
     }
+
+
+    /**
+     * Загружает обложку альбома в ImageView
+     */
+
+    private fun loadAlbumArt(albumId: Long?, imageView: ImageView) {
+        android.util.Log.d("AlbumArt", "loadAlbumArt called with albumId: $albumId")
+
+        if (albumId == null || albumId == 0L) {
+            android.util.Log.d("AlbumArt", "No album ID, showing placeholder")
+            imageView.setImageResource(R.drawable.ic_music_note)
+            imageView.setBackgroundColor(android.graphics.Color.parseColor("#CCCCCC"))
+            return
+        }
+
+        try {
+            // Создаём URI обложки альбома
+            val albumArtUri = android.content.ContentUris.withAppendedId(
+                android.provider.MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                albumId
+            )
+
+
+
+            // Android 10+ (API 29+): используем loadThumbnail()
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                val bitmap = contentResolver.loadThumbnail(
+                    albumArtUri,
+                    android.util.Size(512, 512),  // Размер миниатюры
+                    null
+                )
+                imageView.setImageBitmap(bitmap)
+                imageView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                android.util.Log.d("AlbumArt", "Loaded successfully with loadThumbnail")
+            } else {
+                // Android 9 и ниже: используем старый метод
+                val bitmap = android.provider.MediaStore.Images.Media.getBitmap(contentResolver, albumArtUri)
+                imageView.setImageBitmap(bitmap)
+                imageView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                android.util.Log.d("AlbumArt", "Loaded successfully with getBitmap")
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("AlbumArt", "Error loading album art: ${e.message}", e)
+            // Пробуем извлечь из файла напрямую (фоллбэк)
+            if (currentTrackIndex >= 0 && currentTrackIndex < tracks.size) {
+                val track = tracks[currentTrackIndex]
+                loadAlbumArtFromFile(track.path, imageView)
+            } else {
+                // Заглушка
+                imageView.setImageResource(R.drawable.ic_music_note)
+                imageView.setBackgroundColor(android.graphics.Color.parseColor("#CCCCCC"))
+            }
+        }
+    }
+
+
+    /**
+     * Фоллбэк: извлекает обложку из MP3/M4A файла напрямую
+     */
+    private fun loadAlbumArtFromFile(filePath: String, imageView: ImageView) {
+        try {
+            val mmr = android.media.MediaMetadataRetriever()
+            mmr.setDataSource(filePath)
+            val data = mmr.embeddedPicture
+
+            if (data != null) {
+                val bitmap = android.graphics.BitmapFactory.decodeByteArray(data, 0, data.size)
+                imageView.setImageBitmap(bitmap)
+                imageView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                android.util.Log.d("AlbumArt", "Loaded from file tags")
+            } else {
+                // Нет встроенной обложки
+                imageView.setImageResource(R.drawable.ic_music_note)
+                imageView.setBackgroundColor(android.graphics.Color.parseColor("#CCCCCC"))
+            }
+            mmr.release()
+        } catch (e: Exception) {
+            android.util.Log.e("AlbumArt", "Failed to load from file: ${e.message}")
+            imageView.setImageResource(R.drawable.ic_music_note)
+            imageView.setBackgroundColor(android.graphics.Color.parseColor("#CCCCCC"))
+        }
+    }
+
+
 
     // Освобождение ресурсов при закрытии приложения
     override fun onDestroy() {

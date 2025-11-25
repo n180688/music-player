@@ -96,11 +96,11 @@
         android:elevation="8dp"
         android:gravity="center_vertical">
 
-        <!-- Обложка-заглушка (пока без картинки) -->
+        <!-- Обложка-заглушка  -->
         <ImageView
             android:id="@+id/imageAlbumArt"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:background="#CCCCCC"
             android:scaleType="centerCrop"
             android:contentDescription="Обложка альбома" />

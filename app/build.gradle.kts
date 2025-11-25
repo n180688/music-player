@@ -50,4 +50,7 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.activity:activity-ktx:1.8.2")
 
+    //Glide для загрузки картинок
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
 }
