@@ -20,6 +20,4 @@ enum class PlayMode {
             SHUFFLE -> NORMAL
         }
     }
-
-
 }

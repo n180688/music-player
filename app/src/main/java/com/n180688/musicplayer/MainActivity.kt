@@ -17,7 +17,9 @@ import androidx.recyclerview.widget.RecyclerView
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import com.n180688.musicplayer.PlayerState
 import androidx.activity.OnBackPressedCallback
+
 
 
 
@@ -37,6 +39,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var toolbarSearch: LinearLayout
     private lateinit var editTextSearch: EditText
     private lateinit var buttonSearchBack: Button
+
+
+    private lateinit var miniPlayer: LinearLayout
+
+
 
     // Список для отфильтрованных треков
     private val filteredTracks = mutableListOf<Track>()
@@ -95,12 +102,33 @@ class MainActivity : AppCompatActivity() {
         //обработчик нажатия кнопки Назад
         setupBackPressHandler()
 
+
+        //КЛИК НА МИНИ ПЛЕЕР - ОТКРЫВАЕТСЯ ПОЛНОЭКРАННЫЙ
+        miniPlayer.setOnClickListener {
+            openFullScreenPlayer()
+        }
+
+
         // Проверка и запрос разрешений
         checkAndRequestPermissions()
+
+        // Регистрируем callbacks для FullScreenPlayer
+        PlayerState.onPlayPause = {
+            if (isPlaying) pauseTrack() else resumeTrack()
+        }
+        PlayerState.onNext = { playNextTrack() }
+        PlayerState.onPrevious = { playPreviousTrack() }
+        PlayerState.onSeek = { position ->
+            mediaPlayer?.seekTo(position)
+        }
+
     }
 
     // Привязка UI элементов к переменным
     private fun initViews() {
+
+        miniPlayer = findViewById(R.id.miniPlayer)
+
         recyclerView = findViewById(R.id.recyclerViewTracks)
         textCurrentTrack = findViewById(R.id.textCurrentTrack)
         buttonPlay = findViewById(R.id.buttonPlay)
@@ -483,7 +511,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Воспроизведение трека по индексу
-    private fun playTrack(index: Int) {
+    private fun playTrack(index: Int){
         if (index < 0 || index >= tracks.size) return
 
         // Останавливаем текущий трек
@@ -501,6 +529,12 @@ class MainActivity : AppCompatActivity() {
 
             isPlaying = true
             updateUI()
+
+            // Обновляем глобальное состояние
+            PlayerState.updateTrack(track)
+            PlayerState.updatePlayingState(true)
+            PlayerState.updateDuration(mediaPlayer?.duration ?: 0)
+            startPositionUpdates()  // Запускаем обновление позиции
 
             // Обработчик завершения трека
             mediaPlayer?.setOnCompletionListener {
@@ -542,6 +576,7 @@ class MainActivity : AppCompatActivity() {
         mediaPlayer?.pause()
         isPlaying = false
         updateUI()
+        PlayerState.updatePlayingState(false)
     }
 
     // Возобновление
@@ -549,10 +584,14 @@ class MainActivity : AppCompatActivity() {
         mediaPlayer?.start()
         isPlaying = true
         updateUI()
+        PlayerState.updatePlayingState(true)
+        startPositionUpdates()
     }
 
     // Остановка и освобождение MediaPlayer
     private fun stopCurrentTrack() {
+        PlayerState.updatePlayingState(false)
+        PlayerState.updateTrack(null)
         mediaPlayer?.apply {
             if (isPlaying) {
                 stop()
@@ -774,14 +813,25 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         stopCurrentTrack()
+
+        // Очистка callbacks
+        PlayerState.onPlayPause = null
+        PlayerState.onNext = null
+        PlayerState.onPrevious = null
+        PlayerState.onSeek = null
+
+        // Останавливаем обновление позиции
+        positionUpdateHandler?.removeCallbacks(positionUpdateRunnable ?: return)
     }
 
     // Пауза при сворачивании приложения
     override fun onPause() {
         super.onPause()
-        if (isPlaying) {
-            pauseTrack()
-        }
+
+        //Из-за этой темы трек на паузу ставился при открытии полноэкранного плеера
+//        if (isPlaying) {
+//            pauseTrack()
+//        }
     }
 
 
@@ -806,6 +856,40 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Открывает полноэкранный плеер
+     */
+    private fun openFullScreenPlayer() {
+        if (currentTrackIndex < 0 || currentTrackIndex >= tracks.size) return
 
+        val intent = android.content.Intent(this, FullScreenPlayerActivity::class.java)
+
+        startActivity(intent)
+    }
+
+
+    /**
+     * Запускает периодическое обновление позиции трека
+     */
+    private var positionUpdateHandler: android.os.Handler? = null
+    private var positionUpdateRunnable: Runnable? = null
+
+    private fun startPositionUpdates() {
+        // Останавливаем старый обновлятор
+        positionUpdateHandler?.removeCallbacks(positionUpdateRunnable ?: return)
+
+        positionUpdateHandler = android.os.Handler(android.os.Looper.getMainLooper())
+        positionUpdateRunnable = object : Runnable {
+            override fun run() {
+                mediaPlayer?.let {
+                    if (it.isPlaying) {
+                        PlayerState.updatePosition(it.currentPosition)
+                        positionUpdateHandler?.postDelayed(this, 500)  // Обновление 2 раза/сек
+                    }
+                }
+            }
+        }
+        positionUpdateHandler?.post(positionUpdateRunnable!!)
+    }
 
 }

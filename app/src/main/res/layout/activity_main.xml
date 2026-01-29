@@ -90,8 +90,10 @@
         android:id="@+id/miniPlayer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
         android:orientation="horizontal"
-        android:background="#FFFFFF"
         android:padding="8dp"
         android:elevation="8dp"
         android:gravity="center_vertical">
