@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.n180688.musicplayer.PlayerState
 
 
 class TrackAdapter(
@@ -37,7 +38,14 @@ class TrackAdapter(
         loadAlbumArtWithGlide(track.albumId, track,  holder.imageTrackAlbumArt)
 
         holder.itemView.setOnClickListener {
-            onTrackClick(track)
+            val currentTrack = PlayerState.currentTrack.value
+
+            if(currentTrack?.id == track.id ){
+                //если трек тот же - меняем isplaying
+               PlayerState.onPlayPause?.invoke()
+            } else {
+                onTrackClick(track)
+            }
         }
     }
 

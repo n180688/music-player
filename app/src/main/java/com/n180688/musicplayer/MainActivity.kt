@@ -6,6 +6,7 @@ import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -17,9 +18,9 @@ import androidx.recyclerview.widget.RecyclerView
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import com.n180688.musicplayer.PlayerState
 import androidx.activity.OnBackPressedCallback
-
 
 
 
@@ -42,7 +43,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private lateinit var miniPlayer: LinearLayout
-
+    private lateinit var miniPlayerProgress: ProgressBar
 
 
     // Список для отфильтрованных треков
@@ -122,6 +123,7 @@ class MainActivity : AppCompatActivity() {
             mediaPlayer?.seekTo(position)
         }
 
+
     }
 
     // Привязка UI элементов к переменным
@@ -142,6 +144,8 @@ class MainActivity : AppCompatActivity() {
         buttonSearchBack = findViewById(R.id.buttonSearchBack)
         textCurrentArtist = findViewById(R.id.textCurrentArtist)
         imageAlbumArt = findViewById(R.id.imageAlbumArt)
+        miniPlayerProgress = findViewById(R.id.miniPlayerProgress)
+        miniPlayerProgress.progress = 0
     }
 
 
@@ -700,7 +704,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Обновление UI
+    // Обновление UI (вроде как мини плеера)
     private fun updateUI() {
         if (currentTrackIndex >= 0 && currentTrackIndex < tracks.size) {
             val track = tracks[currentTrackIndex]
@@ -722,6 +726,8 @@ class MainActivity : AppCompatActivity() {
             R.drawable.ic_play
         }
         buttonPlay.setCompoundDrawablesWithIntrinsicBounds(0, playPauseIcon, 0, 0)
+
+        updateMiniPlayerProgress()
     }
 
 
@@ -865,6 +871,7 @@ class MainActivity : AppCompatActivity() {
         val intent = android.content.Intent(this, FullScreenPlayerActivity::class.java)
 
         startActivity(intent)
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
     }
 
 
@@ -884,12 +891,24 @@ class MainActivity : AppCompatActivity() {
                 mediaPlayer?.let {
                     if (it.isPlaying) {
                         PlayerState.updatePosition(it.currentPosition)
+                        updateMiniPlayerProgress()
                         positionUpdateHandler?.postDelayed(this, 500)  // Обновление 2 раза/сек
                     }
                 }
             }
         }
         positionUpdateHandler?.post(positionUpdateRunnable!!)
+    }
+
+    private fun updateMiniPlayerProgress() {
+        PlayerState.currentTrack.value?.let { track ->
+            val progress = if (track.duration > 0) {
+                ((PlayerState.currentPosition.value.toFloat() / track.duration) * 100).toInt()
+            } else 0
+
+            Log.d("MiniPlayer", "Progress update: $progress%")
+            miniPlayerProgress.progress = progress
+        }
     }
 
 }

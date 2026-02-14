@@ -33,6 +33,7 @@ import android.os.Build
 import android.provider.MediaStore
 import android.util.Size
 import android.util.Log
+import androidx.activity.OnBackPressedCallback
 import androidx.compose.ui.platform.LocalContext
 
 
@@ -47,6 +48,12 @@ class FullScreenPlayerActivity : ComponentActivity() {
                 FullScreenPlayerScreen()
             }
         }
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed(){
+                finish()
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
+            }
+        })
     }
 
 
@@ -87,13 +94,19 @@ class FullScreenPlayerActivity : ComponentActivity() {
             isPlaying = isPlaying,
             currentPosition = currentPosition,
             duration = duration,
-            onClose = { (this as? ComponentActivity)?.finish() },
+            onClose = {
+                (this as? ComponentActivity)?.apply {
+                    finish()
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                        }
+                      },
             onPlayPause = { PlayerState.onPlayPause?.invoke() },
             onNext = { PlayerState.onNext?.invoke() },
             onPrevious = { PlayerState.onPrevious?.invoke() },
             onSeek = { PlayerState.onSeek?.invoke(it) }
         )
     }
+
 
     @OptIn(ExperimentalGlideComposeApi::class)
     @Composable
@@ -277,9 +290,7 @@ class FullScreenPlayerActivity : ComponentActivity() {
                     }
 
                     // Play/Pause (большая кнопка)
-                    // БЛЯТЬ
 
-                    //ТУТ СКОРЕЕ ВСЕГО НЕ ПЕРЕРИСОВЫВАЕТСЯ ИЗ-ЗА ТРАБЛОВ С СОСТОЯНИЯМИ ТОЖЕ
                     FloatingActionButton(
                         onClick = onPlayPause,
                         modifier = Modifier.size(72.dp),

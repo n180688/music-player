@@ -85,94 +85,212 @@
         android:layout_weight="1"
         android:layout_marginTop="8dp" />
 
-    <!-- Мини-плеер (закреплён внизу) -->
-    <LinearLayout
-        android:id="@+id/miniPlayer"
+
+    <!-- Обёртка для мини-плеера с прогресс-баром -->
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:elevation="8dp"
-        android:gravity="center_vertical">
+        android:elevation="8dp">
 
-        <!-- Обложка-заглушка  -->
-        <ImageView
-            android:id="@+id/imageAlbumArt"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="#CCCCCC"
-            android:scaleType="centerCrop"
-            android:contentDescription="Обложка альбома" />
+        <!-- Прогресс-бар СВЕРХУ -->
+        <ProgressBar
+            android:id="@+id/miniPlayerProgress"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:layout_alignParentTop="true"
+            style="?android:attr/progressBarStyleHorizontal"
 
-        <!-- Информация о треке (занимает оставшееся место) -->
+            android:max="100"
+            android:progress="0"
+            />
+
+        <!-- Сам мини-плеер -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:id="@+id/miniPlayer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="8dp">
+            android:layout_below="@id/miniPlayerProgress"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/textCurrentTrack"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Выберите трек"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:maxLines="1"
-                android:ellipsize="end" />
+            <!-- Обложка-заглушка  -->
+            <ImageView
+                android:id="@+id/imageAlbumArt"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="#CCCCCC"
+                android:scaleType="centerCrop"
+                android:contentDescription="Обложка альбома" />
 
-            <TextView
-                android:id="@+id/textCurrentArtist"
-                android:layout_width="match_parent"
+            <!-- Информация о треке (занимает оставшееся место) -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Неизвестный артист"
-                android:textSize="12sp"
-                android:textColor="#666666"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:layout_marginTop="2dp" />
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="8dp">
+
+                <TextView
+                    android:id="@+id/textCurrentTrack"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Выберите трек"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/textCurrentArtist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Неизвестный артист"
+                    android:textSize="12sp"
+                    android:textColor="#666666"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:layout_marginTop="2dp" />
+
+            </LinearLayout>
+
+            <!-- Кнопка Previous (слева от Play)-->
+            <Button
+                android:id="@+id/buttonPrevious"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:drawableTop="@drawable/ic_skip_previous"
+                android:contentDescription="Предыдущий трек" />
+
+            <!-- Кнопка Play/Pause -->
+            <Button
+                android:id="@+id/buttonPlay"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:drawableTop="@drawable/ic_play"
+                android:contentDescription="Воспроизведение"
+                android:layout_marginStart="4dp" />
+
+            <!-- Кнопка Next -->
+            <Button
+                android:id="@+id/buttonNext"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:drawableTop="@drawable/ic_skip_next"
+                android:contentDescription="Следующий трек"
+                android:layout_marginStart="4dp" />
 
         </LinearLayout>
+    </RelativeLayout>
+
+    <!-- Мини-плеер (закреплён внизу) -->
+<!--    <LinearLayout-->
+<!--        android:id="@+id/miniPlayer"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:clickable="true"-->
+<!--        android:focusable="true"-->
+<!--        android:background="?attr/selectableItemBackground"-->
+<!--        android:orientation="horizontal"-->
+<!--        android:padding="8dp"-->
+<!--        android:elevation="8dp"-->
+<!--        android:gravity="center_vertical">-->
+
+<!--        <ProgressBar-->
+<!--            android:id="@+id/miniPlayerProgress"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="3dp"-->
+<!--            style="?android:attr/progressBarStyleHorizontal"-->
+<!--            android:progressDrawable="@drawable/mini_player_progress"-->
+<!--            android:max="100"-->
+<!--            android:progress="0" />-->
+
+<!--        &lt;!&ndash; Обложка-заглушка  &ndash;&gt;-->
+<!--        <ImageView-->
+<!--            android:id="@+id/imageAlbumArt"-->
+<!--            android:layout_width="56dp"-->
+<!--            android:layout_height="56dp"-->
+<!--            android:background="#CCCCCC"-->
+<!--            android:scaleType="centerCrop"-->
+<!--            android:contentDescription="Обложка альбома" />-->
+
+<!--        &lt;!&ndash; Информация о треке (занимает оставшееся место) &ndash;&gt;-->
+<!--        <LinearLayout-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_weight="1"-->
+<!--            android:orientation="vertical"-->
+<!--            android:layout_marginStart="12dp"-->
+<!--            android:layout_marginEnd="8dp">-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/textCurrentTrack"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Выберите трек"-->
+<!--                android:textSize="14sp"-->
+<!--                android:textStyle="bold"-->
+<!--                android:textColor="#000000"-->
+<!--                android:maxLines="1"-->
+<!--                android:ellipsize="end" />-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/textCurrentArtist"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Неизвестный артист"-->
+<!--                android:textSize="12sp"-->
+<!--                android:textColor="#666666"-->
+<!--                android:maxLines="1"-->
+<!--                android:ellipsize="end"-->
+<!--                android:layout_marginTop="2dp" />-->
+
+<!--        </LinearLayout>-->
 
 
-        <!-- Кнопка Previous (слева от Play)-->
-        <Button
-            android:id="@+id/buttonPrevious"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:drawableTop="@drawable/ic_skip_previous"
-            android:contentDescription="Предыдущий трек" />
+<!--        &lt;!&ndash; Кнопка Previous (слева от Play)&ndash;&gt;-->
+<!--        <Button-->
+<!--            android:id="@+id/buttonPrevious"-->
+<!--            android:layout_width="48dp"-->
+<!--            android:layout_height="48dp"-->
+<!--            android:background="?attr/selectableItemBackgroundBorderless"-->
+<!--            android:drawableTop="@drawable/ic_skip_previous"-->
+<!--            android:contentDescription="Предыдущий трек" />-->
 
 
 
-        <!-- Кнопка Play/Pause -->
-        <Button
-            android:id="@+id/buttonPlay"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:drawableTop="@drawable/ic_play"
-            android:contentDescription="Воспроизведение"
-            android:layout_marginStart="4dp" />
+<!--        &lt;!&ndash; Кнопка Play/Pause &ndash;&gt;-->
+<!--        <Button-->
+<!--            android:id="@+id/buttonPlay"-->
+<!--            android:layout_width="48dp"-->
+<!--            android:layout_height="48dp"-->
+<!--            android:background="?attr/selectableItemBackgroundBorderless"-->
+<!--            android:drawableTop="@drawable/ic_play"-->
+<!--            android:contentDescription="Воспроизведение"-->
+<!--            android:layout_marginStart="4dp" />-->
 
-        <!-- Кнопка Next -->
-        <Button
-            android:id="@+id/buttonNext"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:drawableTop="@drawable/ic_skip_next"
-            android:contentDescription="Следующий трек"
-            android:layout_marginStart="4dp" />
+<!--        &lt;!&ndash; Кнопка Next &ndash;&gt;-->
+<!--        <Button-->
+<!--            android:id="@+id/buttonNext"-->
+<!--            android:layout_width="48dp"-->
+<!--            android:layout_height="48dp"-->
+<!--            android:background="?attr/selectableItemBackgroundBorderless"-->
+<!--            android:drawableTop="@drawable/ic_skip_next"-->
+<!--            android:contentDescription="Следующий трек"-->
+<!--            android:layout_marginStart="4dp" />-->
 
-    </LinearLayout>
+<!--    </LinearLayout>-->
+
+
+
 
 
 </LinearLayout>
